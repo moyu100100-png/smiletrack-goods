@@ -1,103 +1,60 @@
-// src/lib/firebase.ts
-import { initializeApp, getApps } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  where,
-  Timestamp,
-} from "firebase/firestore";
-import { getAuth } from "firebase/auth";
+"use client";
+import { useState, useEffect } from "react";
+import { getCategories, saveCategories } from "@/lib/firebase";
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+export default function AdminCategoriesPage() {
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCat, setNewCat] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+  useEffect(() => {
+    getCategories().then(setCategories);
+  }, []);
 
-export async function getProducts(category?: string) {
-  const col = collection(db, "products");
-  const q = category && category !== "すべて"
-    ? query(col, where("category", "==", category), orderBy("createdAt", "desc"))
-    : query(col, orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-}
+  function addCategory() {
+    const trimmed = newCat.trim();
+    if (!trimmed || categories.includes(trimmed)) return;
+    setCategories((prev) => [...prev, trimmed]);
+    setNewCat("");
+  }
 
-export async function getProduct(id: string) {
-  const snap = await getDoc(doc(db, "products", id));
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
-}
+  function removeCategory(cat: string) {
+    setCategories((prev) => prev.filter((c) => c !== cat));
+  }
 
-export async function createProduct(data: Record<string, unknown>) {
-  return addDoc(collection(db, "products"), { ...data, createdAt: Timestamp.now() });
-}
+  async function handleSave() {
+    setSaving(true);
+    await saveCategories(categories);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
 
-export async function updateProduct(id: string, data: Record<string, unknown>) {
-  return updateDoc(doc(db, "products", id), { ...data, updatedAt: Timestamp.now() });
-}
-
-export async function deleteProduct(id: string) {
-  return deleteDoc(doc(db, "products", id));
-}
-
-export async function getCollections() {
-  const snap = await getDocs(
-    query(collection(db, "collections"), orderBy("createdAt", "desc"))
-  );
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-}
-
-export async function getCollection(id: string) {
-  const snap = await getDoc(doc(db, "collections", id));
-  if (!snap.exists()) return null;
-  return { id: snap.id, ...snap.data() };
-}
-
-export async function createCollection(data: Record<string, unknown>) {
-  return addDoc(collection(db, "collections"), { ...data, createdAt: Timestamp.now() });
-}
-
-export async function updateCollection(id: string, data: Record<string, unknown>) {
-  return updateDoc(doc(db, "collections", id), { ...data, updatedAt: Timestamp.now() });
-}
-
-export async function deleteCollection(id: string) {
-  return deleteDoc(doc(db, "collections", id));
-}
-
-// ─── Categories ──────────────────────────────────────────────────────────────
-export async function getCategories(): Promise<string[]> {
-  const snap = await getDocs(
-    query(collection(db, "categories"), orderBy("order", "asc"))
-  );
-  if (snap.empty) return [];
-  return snap.docs.map((d) => d.data().name as string);
-}
-
-export async function saveCategories(categories: string[]) {
-  // Delete all existing
-  const snap = await getDocs(collection(db, "categories"));
-  await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "categories", d.id))));
-  // Re-add in order
-  await Promise.all(
-    categories.map((name, order) =>
-      addDoc(collection(db, "categories"), { name, order })
-    )
+  return (
+    <div className="max-w-lg mx-auto">
+      <h2 className="text-base font-semibold text-brand-text mb-4">Category management</h2>
+      <div className="bg-white rounded-xl p-4 mb-4">
+        <div className="flex gap-2 mb-4">
+          <input value={newCat} onChange={(e) => setNewCat(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addCategory()} className="flex-1 border border-brand-gray-mid rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-blue" placeholder="New category name" />
+          <button onClick={addCategory} className="bg-brand-blue text-white px-4 rounded-xl text-sm font-medium">Add</button>
+        </div>
+        {categories.length === 0 ? (
+          <p className="text-xs text-brand-gray-dark">No categories yet</p>
+        ) : (
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <div key={cat} className="flex items-center justify-between py-2 border-b border-brand-gray-mid last:border-0">
+                <span className="text-sm text-brand-text">{cat}</span>
+                <button onClick={() => removeCategory(cat)} className="text-xs text-red-500 bg-red-50 px-3 py-1 rounded-lg">Delete</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <button onClick={handleSave} disabled={saving} className="w-full bg-brand-blue text-white rounded-xl py-4 text-sm font-semibold disabled:opacity-60">
+        {saving ? "Saving..." : saved ? "Saved!" : "Save"}
+      </button>
+    </div>
   );
 }
