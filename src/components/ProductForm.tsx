@@ -1,4 +1,4 @@
-// src/lib/firebase.ts
+﻿// src/lib/firebase.ts
 import { initializeApp, getApps } from "firebase/app";
 import {
   getFirestore,
@@ -31,7 +31,7 @@ export const auth = getAuth(app);
 
 export async function getProducts(category?: string) {
   const col = collection(db, "products");
-  const q = category && category !== "すべて"
+  const q = category && category !== "縺吶∋縺ｦ"
     ? query(col, where("category", "==", category), orderBy("createdAt", "desc"))
     : query(col, orderBy("createdAt", "desc"));
   const snap = await getDocs(q);
@@ -81,7 +81,7 @@ export async function deleteCollection(id: string) {
   return deleteDoc(doc(db, "collections", id));
 }
 
-// ─── Categories ──────────────────────────────────────────────────────────────
+// 笏笏笏 Categories 笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏笏
 export async function getCategories(): Promise<string[]> {
   const snap = await getDocs(
     query(collection(db, "categories"), orderBy("order", "asc"))
@@ -101,3 +101,4 @@ export async function saveCategories(categories: string[]) {
     )
   );
 }
+
