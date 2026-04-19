@@ -36,11 +36,8 @@ export default function HomePage() {
       <div className="bg-white border-b border-brand-gray-mid px-4 pt-5 pb-4">
         <p className="text-xs text-brand-gray-dark tracking-wide uppercase mb-1">SmileTrack Developer Picks</p>
         <h1 className="text-lg font-semibold text-brand-text leading-tight">
-          矯正中に本当に使ってよかったグッズ
+          おすすめ矯正グッズ
         </h1>
-        <p className="text-xs text-brand-gray-dark mt-1">
-          アプリ開発者・Sara が毎日使うケアグッズを紹介します
-        </p>
       </div>
 
       {/* Tab bar */}
@@ -62,7 +59,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Category filter (products only) */}
+      {/* Category filter */}
       {tab === "products" && (
         <div className="bg-white border-b border-brand-gray-mid px-4 py-3 overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 w-max">
@@ -93,26 +90,18 @@ export default function HomePage() {
           </div>
         ) : tab === "products" ? (
           products.length === 0 ? (
-            <p className="text-center text-brand-gray-dark text-sm py-16">
-              商品がまだありません
-            </p>
+            <p className="text-center text-brand-gray-dark text-sm py-16">商品がまだありません</p>
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {products.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+              {products.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           )
         ) : (
           collections.length === 0 ? (
-            <p className="text-center text-brand-gray-dark text-sm py-16">
-              コレクションがまだありません
-            </p>
+            <p className="text-center text-brand-gray-dark text-sm py-16">コレクションがまだありません</p>
           ) : (
             <div className="flex flex-col gap-3">
-              {collections.map((c) => (
-                <CollectionCard key={c.id} collection={c} />
-              ))}
+              {collections.map((c) => <CollectionCard key={c.id} collection={c} />)}
             </div>
           )
         )}
