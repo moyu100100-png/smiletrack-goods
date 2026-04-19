@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getProducts, getCollections, getCategories } from "@/lib/firebase";
+import { getProducts, getCollections } from "@/lib/firebase";
 import { Product, Collection } from "@/types";
 import ProductCard from "@/components/ProductCard";
 import CollectionCard from "@/components/CollectionCard";
@@ -8,21 +8,15 @@ import Header from "@/components/Header";
 
 export default function HomePage() {
   const [tab, setTab] = useState<"products" | "collections">("products");
-  const [category, setCategory] = useState("すべて");
-  const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    getCategories().then((cats) => setCategories(["すべて", ...cats]));
-  }, []);
-
-  useEffect(() => {
     async function load() {
       setLoading(true);
       if (tab === "products") {
-        const data = await getProducts(category !== "すべて" ? category : undefined);
+        const data = await getProducts();
         setProducts(data as Product[]);
       } else {
         const data = await getCollections();
@@ -31,61 +25,29 @@ export default function HomePage() {
       setLoading(false);
     }
     load();
-  }, [tab, category]);
+  }, [tab]);
 
   return (
     <div className="min-h-screen bg-brand-gray">
       <Header />
-
       <div className="bg-white border-b border-brand-gray-mid px-4 pt-5 pb-4">
         <p className="text-xs text-brand-gray-dark mb-1">歯科矯正おすすめアイテム</p>
-        <h1 className="text-lg font-semibold text-brand-text leading-tight">
-          おすすめ矯正グッズ
-        </h1>
+        <h1 className="text-lg font-semibold text-brand-text leading-tight">おすすめ矯正グッズ</h1>
       </div>
-
       <div className="bg-white border-b border-brand-gray-mid sticky top-0 z-10">
         <div className="flex">
           {(["products", "collections"] as const).map((t) => (
-            <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                tab === t ? "text-brand-blue border-b-2 border-brand-blue" : "text-brand-gray-dark"
-              }`}
-            >
+            <button key={t} onClick={() => setTab(t)}
+              className={`flex-1 py-3 text-sm font-medium transition-colors ${tab === t ? "text-brand-blue border-b-2 border-brand-blue" : "text-brand-gray-dark"}`}>
               {t === "products" ? "商品" : "コレクション"}
             </button>
           ))}
         </div>
       </div>
-
-      {tab === "products" && categories.length > 1 && (
-        <div className="bg-white border-b border-brand-gray-mid px-4 py-3 overflow-x-auto scrollbar-hide">
-          <div className="flex gap-2 w-max">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setCategory(cat)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  category === cat
-                    ? "bg-brand-blue text-white"
-                    : "bg-brand-gray text-brand-gray-dark border border-brand-gray-mid"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
       <main className="px-3 py-4">
         {loading ? (
           <div className="grid grid-cols-2 gap-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl aspect-[3/4] animate-pulse" />
-            ))}
+            {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl aspect-[3/4] animate-pulse" />)}
           </div>
         ) : tab === "products" ? (
           products.length === 0 ? (
