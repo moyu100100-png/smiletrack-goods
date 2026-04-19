@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getProducts, getCollections } from "@/lib/firebase";
-import { Product, Collection, CATEGORIES } from "@/types";
+import { getProducts, getCollections, getCategories } from "@/lib/firebase";
+import { Product, Collection } from "@/types";
 import ProductCard from "@/components/ProductCard";
 import CollectionCard from "@/components/CollectionCard";
 import Header from "@/components/Header";
@@ -9,9 +9,14 @@ import Header from "@/components/Header";
 export default function HomePage() {
   const [tab, setTab] = useState<"products" | "collections">("products");
   const [category, setCategory] = useState("すべて");
+  const [categories, setCategories] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getCategories().then((cats) => setCategories(["すべて", ...cats]));
+  }, []);
 
   useEffect(() => {
     async function load() {
@@ -32,15 +37,13 @@ export default function HomePage() {
     <div className="min-h-screen bg-brand-gray">
       <Header />
 
-      {/* Hero */}
       <div className="bg-white border-b border-brand-gray-mid px-4 pt-5 pb-4">
-        <p className="text-xs text-brand-gray-dark tracking-wide uppercase mb-1">SmileTrack Developer Picks</p>
+        <p className="text-xs text-brand-gray-dark mb-1">歯科矯正おすすめアイテム</p>
         <h1 className="text-lg font-semibold text-brand-text leading-tight">
           おすすめ矯正グッズ
         </h1>
       </div>
 
-      {/* Tab bar */}
       <div className="bg-white border-b border-brand-gray-mid sticky top-0 z-10">
         <div className="flex">
           {(["products", "collections"] as const).map((t) => (
@@ -48,9 +51,7 @@ export default function HomePage() {
               key={t}
               onClick={() => setTab(t)}
               className={`flex-1 py-3 text-sm font-medium transition-colors ${
-                tab === t
-                  ? "text-brand-blue border-b-2 border-brand-blue"
-                  : "text-brand-gray-dark"
+                tab === t ? "text-brand-blue border-b-2 border-brand-blue" : "text-brand-gray-dark"
               }`}
             >
               {t === "products" ? "商品" : "コレクション"}
@@ -59,11 +60,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Category filter */}
-      {tab === "products" && (
+      {tab === "products" && categories.length > 1 && (
         <div className="bg-white border-b border-brand-gray-mid px-4 py-3 overflow-x-auto scrollbar-hide">
           <div className="flex gap-2 w-max">
-            {CATEGORIES.map((cat) => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setCategory(cat)}
@@ -80,7 +80,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Content */}
       <main className="px-3 py-4">
         {loading ? (
           <div className="grid grid-cols-2 gap-3">

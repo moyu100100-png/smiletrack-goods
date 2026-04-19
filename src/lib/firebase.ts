@@ -80,3 +80,24 @@ export async function updateCollection(id: string, data: Record<string, unknown>
 export async function deleteCollection(id: string) {
   return deleteDoc(doc(db, "collections", id));
 }
+
+// ─── Categories ──────────────────────────────────────────────────────────────
+export async function getCategories(): Promise<string[]> {
+  const snap = await getDocs(
+    query(collection(db, "categories"), orderBy("order", "asc"))
+  );
+  if (snap.empty) return [];
+  return snap.docs.map((d) => d.data().name as string);
+}
+
+export async function saveCategories(categories: string[]) {
+  // Delete all existing
+  const snap = await getDocs(collection(db, "categories"));
+  await Promise.all(snap.docs.map((d) => deleteDoc(doc(db, "categories", d.id))));
+  // Re-add in order
+  await Promise.all(
+    categories.map((name, order) =>
+      addDoc(collection(db, "categories"), { name, order })
+    )
+  );
+}

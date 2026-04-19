@@ -1,70 +1,83 @@
 "use client";
-import { useAuth } from "@/lib/auth-context";
-import { useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
-import Link from "next/link";
-import { signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { useState, useEffect } from "react";
+import { getCategories, saveCategories } from "@/lib/firebase";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-  const pathname = usePathname();
+export default function AdminCategoriesPage() {
+  const [categories, setCategories] = useState<string[]>([]);
+  const [newCat, setNewCat] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user && pathname !== "/admin/login") {
-      router.replace("/admin/login");
-    }
-  }, [user, loading, pathname, router]);
+    getCategories().then(setCategories);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+  function addCategory() {
+    const trimmed = newCat.trim();
+    if (!trimmed || categories.includes(trimmed)) return;
+    setCategories((prev) => [...prev, trimmed]);
+    setNewCat("");
   }
 
-  if (!user && pathname !== "/admin/login") return null;
-  if (pathname === "/admin/login") return <>{children}</>;
+  function removeCategory(cat: string) {
+    setCategories((prev) => prev.filter((c) => c !== cat));
+  }
+
+  async function handleSave() {
+    setSaving(true);
+    await saveCategories(categories);
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
 
   return (
-    <div className="min-h-screen bg-brand-gray">
-      {/* Admin header */}
-      <header className="bg-white border-b border-brand-gray-mid px-4 h-12 flex items-center justify-between sticky top-0 z-20">
-        <span className="text-sm font-semibold text-brand-text">管理画面</span>
-        <div className="flex items-center gap-4">
-          <Link href="/" className="text-xs text-brand-blue">サイトを見る</Link>
+    <div className="max-w-lg mx-auto">
+      <h2 className="text-base font-semibold text-brand-text mb-4">カテゴリー管理</h2>
+
+      <div className="bg-white rounded-xl p-4 mb-4">
+        <div className="flex gap-2 mb-4">
+          <input
+            value={newCat}
+            onChange={(e) => setNewCat(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addCategory()}
+            className="flex-1 border border-brand-gray-mid rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-blue"
+            placeholder="新しいカテゴリー名"
+          />
           <button
-            onClick={() => signOut(auth)}
-            className="text-xs text-brand-gray-dark"
+            onClick={addCategory}
+            className="bg-brand-blue text-white px-4 rounded-xl text-sm font-medium"
           >
-            ログアウト
+            追加
           </button>
         </div>
-      </header>
 
-      {/* Admin nav */}
-      <nav className="bg-white border-b border-brand-gray-mid px-4 flex gap-6">
-        {[
-          { href: "/admin/products", label: "商品" },
-          { href: "/admin/collections", label: "コレクション" },
-        ].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`py-3 text-sm border-b-2 transition-colors ${
-              pathname.startsWith(item.href)
-                ? "border-brand-blue text-brand-blue font-medium"
-                : "border-transparent text-brand-gray-dark"
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-      </nav>
+        {categories.length === 0 ? (
+          <p className="text-xs text-brand-gray-dark">カテゴリーがありません</p>
+        ) : (
+          <div className="space-y-2">
+            {categories.map((cat) => (
+              <div key={cat} className="flex items-center justify-between py-2 border-b border-brand-gray-mid last:border-0">
+                <span className="text-sm text-brand-text">{cat}</span>
+                <button
+                  onClick={() => removeCategory(cat)}
+                  className="text-xs text-red-500 bg-red-50 px-3 py-1 rounded-lg"
+                >
+                  削除
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
-      <main className="p-4">{children}</main>
+      <button
+        onClick={handleSave}
+        disabled={saving}
+        className="w-full bg-brand-blue text-white rounded-xl py-4 text-sm font-semibold disabled:opacity-60"
+      >
+        {saving ? "保存中..." : saved ? "保存しました！" : "保存する"}
+      </button>
     </div>
   );
 }
