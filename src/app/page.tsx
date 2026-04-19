@@ -31,8 +31,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-brand-gray">
       <Header />
       <div className="bg-white border-b border-brand-gray-mid px-4 pt-5 pb-4">
-        <p className="text-xs text-brand-gray-dark mb-1">歯科矯正おすすめアイテム</p>
-        <h1 className="text-lg font-semibold text-brand-text leading-tight">おすすめ矯正グッズ</h1>
+        <p className="text-xs text-brand-gray-dark mb-1">SmileTrack Developer Picks</p>
+        <h1 className="text-lg font-semibold text-brand-text leading-tight">歯科矯正おすすめアイテム</h1>
       </div>
       <div className="bg-white border-b border-brand-gray-mid sticky top-0 z-10">
         <div className="flex">
