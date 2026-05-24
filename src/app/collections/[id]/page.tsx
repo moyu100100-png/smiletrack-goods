@@ -28,25 +28,26 @@ export default function CollectionDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-brand-gray flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-brand-blue border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ background: "#F5F0EA" }}>
+        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: "2px solid #C4B9AB", borderTopColor: "#8B7355" }} />
       </div>
     );
   }
 
   if (!collection) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-brand-gray-dark">コレクションが見つかりません</p>
-        <button onClick={() => router.back()} className="text-brand-blue text-sm">← 戻る</button>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: "#F5F0EA" }}>
+        <p style={{ color: "#9B8E80" }}>コレクションが見つかりません</p>
+        <button onClick={() => router.back()} className="text-sm" style={{ color: "#8B7355" }}>← 戻る</button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-brand-gray pb-8">
-      <div className="sticky top-0 z-10 bg-white border-b border-brand-gray-mid px-4 h-12 flex items-center">
-        <button onClick={() => router.back()} className="flex items-center gap-1 text-sm">
+    <div className="min-h-screen pb-8" style={{ background: "#F5F0EA" }}>
+      {/* ヘッダー */}
+      <div className="sticky top-0 z-10 px-4 h-12 flex items-center" style={{ background: "rgba(245,240,234,0.92)", backdropFilter: "blur(8px)", borderBottom: "0.5px solid rgba(0,0,0,0.08)" }}>
+        <button onClick={() => router.back()} className="flex items-center gap-1 text-sm" style={{ color: "#4A4440" }}>
           <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -54,16 +55,18 @@ export default function CollectionDetailPage() {
         </button>
       </div>
 
-      <div className="bg-white px-4 py-5 mb-3">
-        <h1 className="text-lg font-semibold text-brand-text">{collection.name}</h1>
+      {/* コレクション情報 */}
+      <div className="px-4 py-5 mb-4 mx-4 mt-4 rounded-xl" style={{ background: "#FDFBF8", border: "0.5px solid rgba(0,0,0,0.07)" }}>
+        <h1 className="text-base font-medium" style={{ color: "#2C2C2A" }}>{collection.name}</h1>
         {collection.description && (
-          <p className="text-sm text-brand-gray-dark mt-1">{collection.description}</p>
+          <p className="text-sm mt-1" style={{ color: "#9B8E80" }}>{collection.description}</p>
         )}
-        <p className="text-xs text-brand-blue mt-2">商品 {products.length}</p>
+        <p className="text-xs mt-2" style={{ color: "#C4B9AB" }}>商品 {products.length}件</p>
       </div>
 
-      <div className="px-3">
-        <div className="grid grid-cols-2 gap-3">
+      {/* 商品グリッド */}
+      <div className="px-4">
+        <div className="grid grid-cols-2 gap-4">
           {products.map((p) => <ProductCard key={p.id} product={p} />)}
         </div>
       </div>
