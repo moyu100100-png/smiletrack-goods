@@ -2,11 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  createCollection,
-  updateCollection,
-  getProducts,
-} from "@/lib/firebase";
+import { createCollection, updateCollection, getProducts } from "@/lib/firebase";
 import { Collection, Product } from "@/types";
 
 interface Props {
@@ -47,7 +43,6 @@ export default function CollectionForm({ initial, collectionId }: Props) {
         coverImage: coverUrl.trim(),
         productIds,
       };
-
       if (isEdit) {
         await updateCollection(collectionId, data);
       } else {
@@ -63,7 +58,6 @@ export default function CollectionForm({ initial, collectionId }: Props) {
 
   return (
     <div className="max-w-lg mx-auto space-y-4">
-      {/* Basic info */}
       <div className="bg-white rounded-xl p-4 space-y-3">
         <div>
           <label className="text-xs font-medium text-brand-gray-dark mb-1 block">コレクション名 *</label>
@@ -90,7 +84,6 @@ export default function CollectionForm({ initial, collectionId }: Props) {
         </div>
       </div>
 
-      {/* Cover image URL */}
       <div className="bg-white rounded-xl p-4">
         <label className="text-xs font-medium text-brand-gray-dark mb-1 block">カバー画像URL</label>
         <p className="text-[10px] text-brand-gray-dark mb-2">
@@ -111,10 +104,9 @@ export default function CollectionForm({ initial, collectionId }: Props) {
         </div>
       </div>
 
-      {/* Product selection */}
       <div className="bg-white rounded-xl p-4">
         <label className="text-xs font-medium text-brand-gray-dark mb-3 block">
-          商品を選択 ({productIds.length}件選択中)
+          商品を選択（{productIds.length}件選択中）
         </label>
         {allProducts.length === 0 ? (
           <p className="text-xs text-brand-gray-dark">商品がまだ登録されていません</p>
@@ -153,5 +145,4 @@ export default function CollectionForm({ initial, collectionId }: Props) {
   );
 }
 
-const inputCls =
-  "w-full border border-brand-gray-mid rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-blue transition-colors bg-white";
+const inputCls = "w-full border border-brand-gray-mid rounded-xl px-3 py-2.5 text-sm outline-none focus:border-brand-blue transition-colors bg-white";
