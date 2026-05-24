@@ -10,59 +10,75 @@ export default function HomePage() {
   const [tab, setTab] = useState<"products" | "collections">("products");
   const [products, setProducts] = useState<Product[]>([]);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [productMap, setProductMap] = useState<Record<string, Product>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       setLoading(true);
-      if (tab === "products") {
-        const data = await getProducts();
-        setProducts(data as Product[]);
-      } else {
-        const data = await getCollections();
-        setCollections(data as Collection[]);
-      }
+      const [prods, cols] = await Promise.all([getProducts(), getCollections()]);
+      const p = prods as Product[];
+      const c = cols as Collection[];
+      setProducts(p);
+      setCollections(c);
+      const map: Record<string, Product> = {};
+      p.forEach((prod) => { map[prod.id] = prod; });
+      setProductMap(map);
       setLoading(false);
     }
     load();
-  }, [tab]);
+  }, []);
 
   return (
-    <div className="min-h-screen bg-brand-gray">
+    <div className="min-h-screen" style={{ background: "#F5F0EA" }}>
       <Header />
-      <div className="bg-white border-b border-brand-gray-mid px-4 pt-5 pb-4">
-        <p className="text-xs text-brand-gray-dark mb-1">SmileTrack Developer Picks</p>
-        <h1 className="text-lg font-semibold text-brand-text leading-tight">歯科矯正おすすめアイテム</h1>
+
+      <div className="px-4 pt-10 pb-8 text-center">
+        <h1 style={{ fontFamily: "Georgia, serif", fontSize: "20px", fontWeight: 400, color: "#2C2C2A", letterSpacing: "0.12em" }}>
+          SmileTrack Developer Picks
+        </h1>
       </div>
-      <div className="bg-white border-b border-brand-gray-mid sticky top-0 z-10">
-        <div className="flex">
-          {(["products", "collections"] as const).map((t) => (
-            <button key={t} onClick={() => setTab(t)}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${tab === t ? "text-brand-blue border-b-2 border-brand-blue" : "text-brand-gray-dark"}`}>
-              {t === "products" ? "商品" : "コレクション"}
-            </button>
-          ))}
-        </div>
+
+      <div className="flex justify-center mx-8" style={{ borderBottom: "0.5px solid rgba(0,0,0,0.1)" }}>
+        {(["products", "collections"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="px-8 py-3 text-sm transition-colors"
+            style={{
+              color: tab === t ? "#2C2C2A" : "#9B8E80",
+              borderBottom: tab === t ? "1.5px solid #2C2C2A" : "1.5px solid transparent",
+              letterSpacing: "0.05em",
+            }}
+          >
+            {t === "products" ? "商品" : "コレクション"}
+          </button>
+        ))}
       </div>
-      <main className="px-3 py-4">
+
+      <main className="px-4 py-6">
         {loading ? (
-          <div className="grid grid-cols-2 gap-3">
-            {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-xl aspect-[3/4] animate-pulse" />)}
+          <div className="grid grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="rounded-xl aspect-square animate-pulse" style={{ background: "#EDE8E0" }} />
+            ))}
           </div>
         ) : tab === "products" ? (
           products.length === 0 ? (
-            <p className="text-center text-brand-gray-dark text-sm py-16">商品がまだありません</p>
+            <p className="text-center text-sm py-16" style={{ color: "#9B8E80" }}>商品がまだありません</p>
           ) : (
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {products.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           )
         ) : (
           collections.length === 0 ? (
-            <p className="text-center text-brand-gray-dark text-sm py-16">コレクションがまだありません</p>
+            <p className="text-center text-sm py-16" style={{ color: "#9B8E80" }}>コレクションがまだありません</p>
           ) : (
-            <div className="flex flex-col gap-3">
-              {collections.map((c) => <CollectionCard key={c.id} collection={c} />)}
+            <div className="grid grid-cols-2 gap-4">
+              {collections.map((c) => (
+                <CollectionCard key={c.id} collection={c} productMap={productMap} />
+              ))}
             </div>
           )
         )}
